@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  newsfetch:
+    image: ghcr.io/brunoscheufler/refinitiv-hackathon-newsfetch:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1::8080"
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.refinitiv-hackathon-newsfetch.rule=Host(`refinitiv-newsfetch.bruno.sh`)"
+      - "traefik.http.routers.refinitiv-hackathon-newsfetch.entrypoints=websecure"
+      - "traefik.http.routers.refinitiv-hackathon-newsfetch.tls.certresolver=main"
+      - "traefik.http.routers.refinitiv-hackathon-newsfetch.service=refinitiv-hackathon-newsfetch"
+      - "traefik.http.services.refinitiv-hackathon-newsfetch.loadbalancer.server.port=8080"

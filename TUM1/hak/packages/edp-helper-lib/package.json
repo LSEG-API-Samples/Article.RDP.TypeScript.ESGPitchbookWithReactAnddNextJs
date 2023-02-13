@@ -1,0 +1,50 @@
+{
+  "_from": "edp-helper-lib@2.0.3",
+  "_id": "edp-helper-lib@2.0.3",
+  "_inBundle": false,
+  "_integrity": "sha1-8qZ0FwmjfHNJIWJNXvfjiMd/Bn8=",
+  "_location": "/edp-helper-lib",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "edp-helper-lib@2.0.3",
+    "name": "edp-helper-lib",
+    "escapedName": "edp-helper-lib",
+    "rawSpec": "2.0.3",
+    "saveSpec": null,
+    "fetchSpec": "2.0.3"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://bams-aws.refinitiv.com/artifactory/api/npm/default.npm.global/edp-helper-lib/edp-helper-lib-2.0.3.tgz",
+  "_shasum": "f2a6741709a37c734921624d5ef7e388c77f067f",
+  "_spec": "edp-helper-lib@2.0.3",
+  "_where": "C:\\Users\\UX503251\\www\\rdp-lib\\rdp-library-typescript\\packages\\data",
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "EDP Token made eazy",
+  "devDependencies": {
+    "concat": "^1.0.3",
+    "rimraf": "^3.0.0",
+    "rollup": "^1.19.4",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-terser": "^5.2.0",
+    "rollup-plugin-typescript2": "^0.22.1",
+    "tsc": "^1.20150623.0",
+    "typescript": "^3.5.3"
+  },
+  "main": "dist/EDPHelper.js",
+  "name": "edp-helper-lib",
+  "scripts": {
+    "build": "npm run clear-dist && rollup -c",
+    "build-to-bams": "npm run build && npm run build-to-bams-npm && npm run build-to-bams-bower",
+    "build-to-bams-bower": "bamsu -u default.bower.cloud/edp-helper-lib",
+    "build-to-bams-npm": "bamsu -u default.npm.cloud/edp-helper-lib",
+    "build-without-rollup": "clear-dist && tsc && concat -o dist/EDPHelper.js src/lib/promise-polyfill.js dist/EDPHelper.js",
+    "clear-dist": "rimraf dist/"
+  },
+  "types": "dist/index.d.ts",
+  "version": "2.0.3"
+}

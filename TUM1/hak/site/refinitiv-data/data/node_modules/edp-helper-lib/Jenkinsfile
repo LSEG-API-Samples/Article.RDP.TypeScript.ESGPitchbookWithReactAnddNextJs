@@ -1,0 +1,263 @@
+#!/usr/bin/env groovy
+import groovy.json.JsonSlurper
+import groovy.json.JsonBuilder
+import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
+
+gitDefaultBranch = env.gitDefaultBranch ? env.gitDefaultBranch : "main";
+
+gitUrl = "git@git.sami.int.thomsonreuters.com:universalcontainer/edp-helper-lib.git";
+
+userEmail = env.userEmail ? env.userEmail : "eikonlight-dev-bkk@refinitiv.com";
+userName = env.userName ? env.userName : "CI EikonBuild";
+
+credentialsId = env.credentialsId ? env.credentialsId : 'ff6d456b-4ff7-4543-bf77-ae2816a6597b';
+notifiedEmail = env.notifiedEmail ? env.notifiedEmail : "rw-bkk-squad-scorpio@refinitiv.com";
+
+isProductionBuild = false
+isTestBuild = env.isTest ? env.isTest.toBoolean() : false
+
+targetBranch = gitDefaultBranch
+targetBuildVersion = ''
+tagName = ''
+
+temporaryFile = 'temporaryFile.txt'
+npmPackageName = 'edp-helper-lib'
+
+
+def isProduction() {
+    def productionBranches = [gitDefaultBranch, "origin/${gitDefaultBranch}"]
+    def isProductionBranch = productionBranches.any{ branch -> branch == targetBranch }
+    if (isProductionBranch) {
+        return env.isProd.toBoolean()
+    }
+    return false
+}
+
+def getJobDisplayName() {
+    def testPrefix = isTestBuild ? '[Test] ' : ''
+    def productionPrefix = isProductionBuild ? 'production/' : ''
+    return "${testPrefix}${productionPrefix}${targetBuildVersion}"
+}
+
+def getGitBranchName() {
+    def isGitlabHook = env.gitlabBranch
+    if (isGitlabHook) {
+        echo "gitlab hook ${env.gitlabBranch}"
+        return env.gitlabBranch
+    }
+    def isWebHook = env.ci_ref
+    if (isWebHook) {
+        echo "web hook ${env.ci_ref}"
+        return env.ci_ref
+    }
+
+    echo "git branch ${env.gitBranch}"
+    return env.gitBranch
+}
+
+def getBuildVersion(isProdBuild) {
+    def specificBuildVersion = env.buildVersion
+    def nextVersion
+    if (!specificBuildVersion) {
+        def packageFile = readFile('./package.json')
+        nextVersion = getNextVersion(new JsonSlurper().parseText(packageFile).version)
+    } else {
+        nextVersion = specificBuildVersion
+    }
+
+    if (isProdBuild) {
+        return nextVersion
+    } else {
+        return getNextPreviewVersion(nextVersion)
+    }
+}
+
+def getNextVersion(version) {
+    def (major, minor, patch) = version.split("-")[0].tokenize('.')
+    def majorVersion = major
+    def minorVersion = minor
+    def patchVersion = patch.toInteger() + 1
+    def baseVersion = "${majorVersion}.${minorVersion}.${patchVersion}".toString()
+    return baseVersion
+}
+
+def getNextPreviewVersion(version) {
+    bat "npm view ${npmPackageName}@\">${version}-preview <${version}\" version > ${temporaryFile}"
+    echo "${readFile(temporaryFile)}"
+    def existVersions = readFile(temporaryFile).split("\n")
+    if (existVersions.length > 1) {
+        existVersions = existVersions
+            .collect{ it?.tokenize(" ") }                           // ["edp-helper-lib@2.0.0-preview.5" "'2.0.0-preview.5'"]
+            .collect{ it[1] }                                       // '2.0.0-preview.5'
+            .collect{ it?.replaceAll(/'/, '') }                     // 2.0.0-preview.5
+    }
+    existVersions = existVersions
+        .findAll{ it?.startsWith("${version}-preview.") }
+        .collect{ it?.replaceAll("${version}-preview", "") }        // 5
+        .collect{ it[1].toInteger() }
+    echo "Exist versions -> ${existVersions}"
+    def nextVersion = existVersions.inject(1) {
+        max, current -> current + 1 > max ? current + 1 : max
+    }
+    def nextPreviewVersion = "${version}-preview.${nextVersion}".toString()
+    return nextPreviewVersion
+}
+
+def uploadToBAMS() {
+    def win32Curl = '''"C:\\Program Files\\curl\\curl.exe"'''
+    def bamsUrl = "https://bams-aws.int.thomsonreuters.com/artifactory/default.npm.cloud/edp-helper-lib/edp-helper-lib-${targetBuildVersion}.tgz"
+    def archivePath = ".\\edp-helper-lib-${targetBuildVersion}.tgz"
+    def runCurl = ''' -k -u ''' + SVN + ''' -T ''' + '"'+ archivePath + '"' + " " + bamsUrl
+
+    bat "${win32Curl}${runCurl}"
+}
+
+pipeline {
+    agent { label "windows" }
+
+    options { skipDefaultCheckout() }
+
+    parameters {
+        gitParameter(name: 'gitBranch', defaultValue: "origin/${gitDefaultBranch}", description: 'Branch to be built', listSize: '5', quickFilterEnabled: true, type: 'PT_BRANCH')
+        string(name: 'buildVersion', defaultValue: '', description: 'Specific build version.')
+        booleanParam(name: 'isProd', defaultValue: false, description: 'The build will be build as preview if this flag disable.')
+        booleanParam(name: 'isTest', defaultValue: false, description: 'Job will skip tagging and publishing when this flag enable.')
+    }
+
+    stages {
+        stage('Clean') {
+            steps {
+                cleanWs();
+                bat "git --version"
+                bat "@set"
+
+                script {
+
+                    echo "Set parameters:"
+                    params.each {
+                        param -> echo " - ${param.key}: ${param.value} "
+                    }
+
+                    // web hook
+                    if (env.ci_ref) {
+                        def (user, company) = env.ci_user.tokenize('@');
+                        currentBuild.description = "Built ${env.ci_ref} by ${user}"
+                    }
+                }
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                script {
+                    targetBranch = getGitBranchName()
+                    isProductionBuild = isProduction()
+                }
+
+                echo "Checking out branch -> ${targetBranch}"
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: targetBranch]],
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [[
+                        $class: 'CloneOption',
+                        noTags: false,
+                        reference: '',
+                        shallow: false
+                    ]],
+                    submoduleCfg: [],
+                    userRemoteConfigs: [[
+                        credentialsId: credentialsId,
+                        url: gitUrl
+                    ]]
+                ])
+
+            }
+        }
+
+        stage('Pack') {
+            steps {
+                script {
+                    targetBuildVersion = getBuildVersion(isProductionBuild)
+                    tagName = "${targetBuildVersion}"
+
+                    echo "Updating display name."
+                    currentBuild.displayName = getJobDisplayName()
+
+                    echo "Logging build detail:"
+                    echo " - target branch: ${targetBranch}"
+                    echo " - production build: ${isProductionBuild}"
+                    echo " - build version: ${targetBuildVersion}"
+
+                    echo "Updating version in package.json file."
+                    def packageDetail = readJSON file: './package.json'
+                    packageDetail.version = targetBuildVersion
+                    writeJSON file: './package.json', json: packageDetail, pretty: 4
+                    echo " - package detail ${packageDetail}"
+
+                    echo "Updating version in bower.json file."
+                    def bowerDetail = readJSON file: './bower.json'
+                    bowerDetail.version = targetBuildVersion
+                    writeJSON file: './bower.json', json: bowerDetail, pretty: 4
+                    echo " - bower detail ${bowerDetail}"
+                }
+
+                echo "Packing the package"
+                bat 'npm pack'
+            }
+        }
+
+        stage('Upload') {
+            when {
+                expression { return !isTestBuild }
+            }
+            steps {
+                echo "Uploading"
+
+                withCredentials([[
+                    $class: 'UsernamePasswordBinding',
+                    credentialsId: 'SVN',
+                    variable: 'SVN'
+                ]]) {
+                    uploadToBAMS()
+                }
+            }
+        }
+
+        stage('Tag') {
+            when {
+                expression { return isProductionBuild && !isTestBuild}
+            }
+            steps {
+                echo "Tagging"
+                sshagent([credentialsId]) {
+                    bat "git checkout ${gitDefaultBranch}"
+
+                    bat "git config user.email '${userEmail}'"
+                    bat "git config user.name '${userName}'"
+
+                    bat "git add ./package.json"
+                    bat "git add ./bower.json"
+                    bat "git commit -m \"chore(release): Publish [ci skip][ci-skip]\""
+
+                    bat "git tag -a \"${tagName}\" -m 'v${targetBuildVersion}' -f"
+
+                    bat "git push origin ${gitDefaultBranch}"
+                    bat "git push origin refs/tags/${tagName}"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            archiveArtifacts allowEmptyArchive: true, artifacts: "edp-helper-lib-${targetBuildVersion}.tgz"
+        }
+    //     failure {
+    //         emailext body: 'url=${RUN_DISPLAY_URL}\r\n\r\n${BUILD_LOG, maxLines=9999, escapeHtml=false}', recipientProviders: [requestor(), culprits()], subject: 'Build failed on ${JOB_BASE_NAME} ${BUILD_DISPLAY_NAME}'
+    //     }
+    //     regression {
+    //         emailext body: '${BUILD_CAUSE}\r\nurl=${RUN_DISPLAY_URL}', subject: 'Build regression on ${JOB_BASE_NAME} ${BUILD_DISPLAY_NAME}', to: notifiedEmail
+    //     }
+    }
+}

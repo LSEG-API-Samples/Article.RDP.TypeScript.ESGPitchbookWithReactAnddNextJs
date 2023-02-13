@@ -1,0 +1,26 @@
+# Prepare environment for remote Docker context
+# We use a variable that will be substituted because
+# we cannot inject new variables into specific jobs otherwise
+setProdComposeEnv := '''
+  # Connect to remote Docker host via SSH
+  export DOCKER_HOST=ssh://root@s1.infra.bruno.sh
+  # Uses Docker Compose environment vars (https://docs.docker.com/compose/reference/envvars/)
+  # Select different namespace to distinguish root deployment
+  export COMPOSE_PROJECT_NAME=refinitiv_hackathon
+  # Use production compose file
+  export COMPOSE_FILE=docker-compose.yml
+'''
+
+# Deploy production deployment over SSH
+deploy:
+  #!/usr/bin/env bash
+  set -euxo pipefail
+
+  {{setProdComposeEnv}}
+
+  docker build -t ghcr.io/brunoscheufler/refinitiv-hackathon-newsfetch:latest .
+  docker push ghcr.io/brunoscheufler/refinitiv-hackathon-newsfetch:latest
+
+  docker-compose pull
+  docker-compose up -d --remove-orphans
+  docker image prune -af

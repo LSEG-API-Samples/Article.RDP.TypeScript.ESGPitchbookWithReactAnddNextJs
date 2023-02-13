@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.setDefault = exports.getDefault = void 0;
+const default_session_manager_1 = require("./default-session-manager");
+const defaultSessionManager = default_session_manager_1.DefaultSessionManagerImpl.getInstance();
+const getDefault = defaultSessionManager.getDefault;
+exports.getDefault = getDefault;
+const setDefault = defaultSessionManager.setDefault;
+exports.setDefault = setDefault;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvc2Vzc2lvbi9kZWZhdWx0LXNlc3Npb24vaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBQUEsdUVBQXNFO0FBR3RFLE1BQU0scUJBQXFCLEdBQTBCLG1EQUF5QixDQUFDLFdBQVcsRUFBRSxDQUFDO0FBQzdGLE1BQU0sVUFBVSxHQUF3QyxxQkFBcUIsQ0FBQyxVQUFVLENBQUM7QUFHaEYsZ0NBQVU7QUFGbkIsTUFBTSxVQUFVLEdBQXdDLHFCQUFxQixDQUFDLFVBQVUsQ0FBQztBQUVwRSxnQ0FBVSJ9
