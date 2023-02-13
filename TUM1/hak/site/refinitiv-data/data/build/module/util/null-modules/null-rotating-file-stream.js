@@ -1,0 +1,5 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const NullRotatingFileStream = {};
+exports.default = NullRotatingFileStream;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibnVsbC1yb3RhdGluZy1maWxlLXN0cmVhbS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL3NyYy91dGlsL251bGwtbW9kdWxlcy9udWxsLXJvdGF0aW5nLWZpbGUtc3RyZWFtLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBQUEsTUFBTSxzQkFBc0IsR0FBRyxFQUFFLENBQUM7QUFFbEMsa0JBQWUsc0JBQXNCLENBQUMifQ==

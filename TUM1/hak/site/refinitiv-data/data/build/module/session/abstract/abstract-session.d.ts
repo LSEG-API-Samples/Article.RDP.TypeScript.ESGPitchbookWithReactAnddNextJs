@@ -1,0 +1,37 @@
+import { DeepPartial, HttpResponse } from '@refinitiv-data/common';
+import { OMMResponse, RDPResponse } from '../../delivery/stream/protocol';
+import { socketCreator, StreamConnection, StreamLoginParams } from '../../delivery/stream/stream-connection.interface';
+import { AbstractStateManager } from '../../state/state-manager';
+import { ApiEndpoint, ApiEndpoints, Session, SessionRequestParams } from '../session.interface';
+export declare abstract class AbstractSession extends AbstractStateManager implements Session {
+    protected readonly httpClient: import("../../http-client").HttpClient;
+    protected get invalidStateMessage(): string;
+    protected abstract get cookieJarSupport(): boolean;
+    isEndpointSupported: boolean;
+    protected log: import("loglevel").Logger;
+    protected sessionEventsEmitter: Session;
+    protected streamConnections: Map<string, StreamConnection<any>>;
+    private getStreamConnectionLimit;
+    private cookieJar;
+    constructor(httpClient?: import("../../http-client").HttpClient);
+    sendRequest<T>(requestParams: SessionRequestParams): Promise<HttpResponse<T>>;
+    getOMMStreamConnection(api?: string, validateState?: boolean): Promise<StreamConnection<OMMResponse>>;
+    getRDPStreamConnection(api?: string, validateState?: boolean): Promise<StreamConnection<RDPResponse>>;
+    abstract getOverriddenEndpoints(): DeepPartial<ApiEndpoints>;
+    getOverriddenEndpoint(group: keyof ApiEndpoints, name: string): DeepPartial<ApiEndpoint> | undefined;
+    protected abstract initialize(): Promise<void>;
+    protected abstract request<T>(requestParams: SessionRequestParams): Promise<HttpResponse<T>>;
+    protected abstract getSocketCreators(api: string, protocol: string): Promise<socketCreator[]>;
+    protected abstract getStreamLoginParams(): StreamLoginParams;
+    protected abstract checkPipeErrors(): Promise<void>;
+    protected cleanUp(): Promise<void>;
+    private getStreamingTypes;
+    private checkAndValidateState;
+    private createStreamConnection;
+    private getStreamConnection;
+    private mapError;
+    private mapReconnectError;
+    private addCookies;
+    private getCookies;
+    private saveCookies;
+}

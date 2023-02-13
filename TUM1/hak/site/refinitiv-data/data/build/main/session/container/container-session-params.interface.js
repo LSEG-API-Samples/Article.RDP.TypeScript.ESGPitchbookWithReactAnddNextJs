@@ -1,0 +1,5 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PIPE_INIT_WAIT_MAX_TIMEOUT_MS = void 0;
+exports.PIPE_INIT_WAIT_MAX_TIMEOUT_MS = 10000;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29udGFpbmVyLXNlc3Npb24tcGFyYW1zLmludGVyZmFjZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL3NyYy9zZXNzaW9uL2NvbnRhaW5lci9jb250YWluZXItc2Vzc2lvbi1wYXJhbXMuaW50ZXJmYWNlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7OztBQU9hLFFBQUEsNkJBQTZCLEdBQUcsS0FBSyxDQUFDIn0=

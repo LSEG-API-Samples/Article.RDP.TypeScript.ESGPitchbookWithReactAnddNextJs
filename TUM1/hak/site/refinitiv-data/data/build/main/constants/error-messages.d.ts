@@ -1,0 +1,21 @@
+export declare enum ErrorMessages {
+    INVALID_STATE_MESSAGE = "State is NOT Opened",
+    INVALID_SESSION_STATE_MESSAGE = "Session State is NOT Opened",
+    INVALID_STREAM_CONNECTION_STATE_MESSAGE = "StreamConnection State is NOT Opened",
+    DROPPED_STREAM_INITIALIZATION = "Stream was closed before the connection was established!",
+    FAILED_STREAM_AUTHENTICATION = "Stream connection authentication has failed",
+    CLOSED_STREAM_CONNECTION_TIMEOUT = "Stream connection has been closed. No response for a long time",
+    FAILED_ITEM_STREAM_INITIALIZATION = "Cannot open ItemStream",
+    ONLY_STREAMING_CONNECTION = "Platform Session without Rdp credentials only supports streaming connection",
+    STREAMING_PRICES_CANNOT_OPEN = "Cannot open PricingStream for any instrument name passed",
+    STREAMING_CHAINS_CANNOT_OPEN = "Cannot open ItemStream for any chain records name passed",
+    FIELD_NAME_MISSING = "Field name is missing",
+    NON_REAL_TIME_FIELDS_REQUIRED = "Please specify only valid fields",
+    TRANSPORT_MISSED = "Transport was not created",
+    WRONG_TRANSPORT_TYPE = "Wrong transport type for Container Session",
+    STREAMING_NOT_READY_OR_UNAVAILABLE = "The streaming channel is not ready yet or unavailable in this running environment. Please try again later",
+    CONTAINER_VERSION_UNAVAILABLE = "\"containerVersion\" of JET.ContainerDescription is unavailable",
+    INITIALIZE_FIRST = "You must initialize transports before use!",
+    EDP_HELPER_UNAVAILABLE = "EDP helper is unavailable. Please check your container environment.",
+    SURFACE_TAG_IS_MISSING = "Invalid input: surfaceTag is empty. Please fill it!"
+}

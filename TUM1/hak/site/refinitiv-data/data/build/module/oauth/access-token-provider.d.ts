@@ -1,0 +1,36 @@
+import EventEmitter from 'eventemitter3';
+import { AccessTokenProvider, TokenProviderEvents } from './access-token-provider.interface';
+import { PasswordGrant } from './password-grant.interface';
+export declare const RETRY_REFRESH_TIMEOUT = 30;
+export declare const DEFAULT_TOKEN_EXPIRY_TIME_SEC: number;
+export declare const TOKEN_REDUCING_VALIDITY_TIME = 5;
+export declare class AccessTokenProviderImpl extends EventEmitter<TokenProviderEvents> implements AccessTokenProvider {
+    private appKey;
+    private getAuthUrl;
+    private oAuthGrantType;
+    private httpClient;
+    private refreshTimeoutId?;
+    private expireTimeoutId?;
+    private platformAuthParams?;
+    private limit;
+    private log;
+    private isStopped;
+    constructor(appKey: string, getAuthUrl: () => string, oAuthGrantType: PasswordGrant, httpClient?: import("..").HttpClient);
+    login(): Promise<void>;
+    emit<T extends EventEmitter.EventNames<TokenProviderEvents>>(event: T, ...args: EventEmitter.EventArgs<TokenProviderEvents, T>): boolean;
+    getToken(): string;
+    stopRefresh(): void;
+    private processRefreshRequest;
+    private executeAuthenticationWithSafeGuard;
+    private getValidExpiresIn;
+    private autoReconnectEnabled;
+    private reLogin;
+    private runTimers;
+    private clearAllTimers;
+    private startRefreshTimer;
+    private startExpireTimer;
+    private onRetryLoginFailed;
+    private clearRefreshTimeout;
+    private clearExpiresTimeout;
+    private stopWithError;
+}

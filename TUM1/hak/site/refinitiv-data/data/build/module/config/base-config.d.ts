@@ -1,0 +1,37 @@
+import { Config, InternalSchema, Options, Overwrite, PredefinedFormat, Schema, SchemaObj, ValidateOptions, ValidationMethod } from 'convict';
+import EventEmitter from 'eventemitter3';
+import { ConfigEvents } from './config.interfaces';
+export { InternalSchema, Overwrite, ValidateOptions, ValidationMethod, PredefinedFormat, Options as ConfigOptions, SchemaObj, Schema };
+export declare class BaseConfig<T> extends EventEmitter<ConfigEvents<T>> implements Config<T> {
+    private initialSchema;
+    private config;
+    private defaultConfigExtensions;
+    get defaultConfig(): Config<T>;
+    constructor(initialSchema: T);
+    get<K extends string | keyof T | null | undefined = undefined>(name?: K): K extends null | undefined ? T : K extends keyof T ? T[K] : any;
+    get<K extends keyof T, K2 extends keyof T[K]>(name: string): T[K][K2];
+    get<K extends keyof T, K2 extends keyof T[K], K3 extends keyof T[K][K2]>(name: K): T[K][K2][K3];
+    get<K extends keyof T, K2 extends keyof T[K], K3 extends keyof T[K][K2], K4 extends keyof T[K][K2][K3]>(name: string): T[K][K2][K3][K4];
+    set<K extends string | keyof T>(name: K, value: K extends keyof T ? T[K] : any): Config<T>;
+    set<K extends keyof T, K2 extends string | keyof T[K]>(name: K, value: K2 extends keyof T[K] ? T[K][K2] : any): Config<T>;
+    set<K extends keyof T, K2 extends keyof T[K], K3 extends string | keyof T[K][K2]>(name: K, value: K3 extends keyof T[K][K2] ? T[K][K2][K3] : any): Config<T>;
+    set<K extends keyof T, K2 extends keyof T[K], K3 extends keyof T[K][K2], K4 extends string | keyof T[K][K2][K3]>(name: K, value: K4 extends keyof T[K][K2][K3] ? T[K][K2][K3][K4] : any): Config<T>;
+    default<K extends string | keyof T | null | undefined = undefined>(name?: K | undefined): K extends keyof T ? T[K] : K extends null | undefined ? T : any;
+    default<K extends keyof T>(name?: K | undefined): T[K];
+    default<K extends keyof T, K2 extends keyof T[K]>(name: string): T[K][K2];
+    default<K extends keyof T, K2 extends keyof T[K], K3 extends keyof T[K][K2]>(name: K): T[K][K2][K3];
+    default<K extends keyof T, K2 extends keyof T[K], K3 extends keyof T[K][K2], K4 extends keyof T[K][K2][K3]>(name: string): T[K][K2][K3][K4];
+    has<K extends string | keyof T = string>(name: K): boolean;
+    has<K extends keyof T, K2 extends keyof T[K]>(name: string): boolean;
+    has<K extends keyof T, K2 extends keyof T[K], K3 extends keyof T[K][K2]>(name: K): boolean;
+    has<K extends keyof T, K2 extends keyof T[K], K3 extends keyof T[K][K2], K4 extends keyof T[K][K2][K3]>(name: string): boolean;
+    load<U>(conf: U): Config<Overwrite<T, U>>;
+    loadFile<U>(files: string | string[]): Config<Overwrite<T, U>>;
+    validate(options?: ValidateOptions | undefined): Config<T>;
+    getProperties(): T;
+    getSchema(): InternalSchema<T>;
+    toString(): string;
+    getSchemaString(): string;
+    protected registerExtendedDefault(configExtend: any): void;
+    protected resetConfig(): Config<T>;
+}

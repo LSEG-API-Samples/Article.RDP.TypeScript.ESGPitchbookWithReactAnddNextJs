@@ -1,0 +1,32 @@
+import { DeepPartial, HttpResponse } from '@refinitiv-data/common';
+import { socketCreator, StreamLoginParams } from '../../delivery/stream/stream-connection.interface';
+import { AbstractSession } from '../abstract/abstract-session';
+import { ApiEndpoints, SessionDefinition, SessionRequestParams } from '../session.interface';
+import { DesktopSessionParams } from './desktop-session-params.interface';
+export declare class DesktopSession extends AbstractSession {
+    private sessionParams;
+    static Definition(appKey: string): SessionDefinition;
+    static Definition(params: DesktopSessionParams): SessionDefinition;
+    get rdpUrlRoot(): string;
+    private get defaultPort();
+    private get baseUrl();
+    private get udfUrlRoot();
+    private get handshakeEndpoint();
+    private get uuid();
+    private port;
+    private accessToken?;
+    private tokenType?;
+    private socketCreators;
+    getOverriddenEndpoints(): DeepPartial<ApiEndpoints>;
+    protected get cookieJarSupport(): boolean;
+    protected initialize(): Promise<void>;
+    protected request<T>(sessionRequestParams: SessionRequestParams): Promise<HttpResponse<T>>;
+    protected getSocketCreators(api: string, protocolName: string): Promise<socketCreator[]>;
+    protected getStreamLoginParams(): StreamLoginParams;
+    private prepareWebSocketCreators;
+    private getStreamingDiscoveryEndpoint;
+    private requestWebSocketList;
+    private emitAuthenticationSuccess;
+    private emitAuthenticationFailed;
+    protected checkPipeErrors(): Promise<void>;
+}

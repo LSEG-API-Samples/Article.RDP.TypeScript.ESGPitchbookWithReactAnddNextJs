@@ -1,0 +1,30 @@
+import { AbstractReconnectStateManager } from '../../state/reconnect-state-manager';
+import { Protocol } from './protocol/protocol.interface';
+import { socketCreator, StreamConnection, StreamLoginParams, StreamRequestParams } from './stream-connection.interface';
+import { AbstractHashGenerator } from '../../util/hash-generator';
+export declare class StreamConnectionImpl<Req, Res> extends AbstractReconnectStateManager implements StreamConnection<Res> {
+    private protocol;
+    private socketCreatorsList;
+    private getStreamLoginParams;
+    private hashGenerator;
+    protected streamEventsEmitter: StreamConnection<Res>;
+    private connection?;
+    private pingTimeout?;
+    private isAlive;
+    private pingPongConfig?;
+    constructor(protocol: Protocol<Req, Res>, socketCreatorsList: socketCreator[], getStreamLoginParams: () => StreamLoginParams, hashGenerator: AbstractHashGenerator<number>);
+    protected get invalidStateMessage(): string;
+    initialize(socketIndex?: number): Promise<void>;
+    cleanUp(): Promise<void>;
+    request(streamRequest: StreamRequestParams): Promise<number>;
+    closeRequest(ID: number): Promise<void>;
+    modifyRequest(ID: number, params: StreamRequestParams): Promise<void>;
+    refresh(): Promise<void>;
+    private login;
+    private sendMessage;
+    private onStreamError;
+    private onAuthMessage;
+    private onStreamMessage;
+    private heartbeat;
+    private clearPingTimeout;
+}
